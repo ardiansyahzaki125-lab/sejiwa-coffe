@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pembayaran - Sejiwa Coffee</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { background-color: #f4f6f9; }
+        .payment-card { border: none; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+        .qris-box { border: 2px dashed #0d6efd; border-radius: 12px; background: #fff; padding: 20px; }
+    </style>
+</head>
+<body>
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-6 col-lg-5">
+            <div class="text-center mb-4">
+                <h3 class="fw-bold text-dark"><i class="fa-solid fa-mug-hot text-warning me-2"></i>Sejiwa Coffee</h3>
+                <p class="text-muted small">Silakan selesaikan pembayaran Anda</p>
+            </div>
+
+            <div class="card payment-card p-4 bg-white">
+                <div class="text-center border-bottom pb-3 mb-3">
+                    <span class="badge bg-secondary mb-2">Order #<%= order.order_number %></span>
+                    <small class="d-block text-muted">Total Pembayaran</small>
+                    <h2 class="fw-bold text-primary m-0">Rp <%= Number(order.total).toLocaleString('id-ID') %></h2>
+                </div>
+
+                <!-- Box QRIS -->
+                <div class="qris-box text-center mb-4">
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=SEJIWA-PAYMENT-<%= order.order_number %>" alt="QRIS Code" class="img-fluid mb-2" style="max-width: 180px;">
+                    <p class="small text-muted m-0">Scan menggunakan GoPay, OVO, Dana, ShopeePay, atau Mobile Banking</p>
+                </div>
+
+                <div class="alert alert-info small d-flex align-items-center mb-4" role="alert">
+                    <i class="fa-solid fa-circle-info fa-lg me-2"></i>
+                    <div>Setelah melakukan pembayaran, tekan tombol di bawah ini agar kasir dapat memverifikasi pesanan Anda.</div>
+                </div>
+
+                <form action="/customer/payment/<%= order.order_number %>/confirm" method="POST">
+                    <button type="submit" class="btn btn-success w-100 py-3 fw-bold fs-6">
+                        <i class="fa-solid fa-check-circle me-2"></i> Saya Sudah Bayar
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
