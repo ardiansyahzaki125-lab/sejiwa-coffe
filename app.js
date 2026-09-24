@@ -1,3 +1,7 @@
+// Mengalihkan alamat utama (/) langsung ke login admin
+app.get('/', (req, res) => {
+    res.redirect('/admin/login');
+});
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
