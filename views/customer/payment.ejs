@@ -29,10 +29,17 @@
                     <h2 class="fw-bold text-primary m-0">Rp <%= Number(order.total).toLocaleString('id-ID') %></h2>
                 </div>
 
-                <!-- Box QRIS -->
+                <!-- Box QRIS Dinamis -->
                 <div class="qris-box text-center mb-4">
-                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=SEJIWA-PAYMENT-<%= order.order_number %>" alt="QRIS Code" class="img-fluid mb-2" style="max-width: 180px;">
-                    <p class="small text-muted m-0">Scan menggunakan GoPay, OVO, Dana, ShopeePay, atau Mobile Banking</p>
+                    <% if (qrisImage) { %>
+                        <img src="<%= qrisImage %>" alt="QRIS Dinamis Sejiwa Coffee" class="img-fluid rounded" style="max-width: 280px;">
+                    <% } else { %>
+                        <img src="/images/qris-code.jpeg" alt="QRIS Sejiwa Coffee" class="img-fluid rounded" style="max-width: 280px;">
+                    <% } %>
+                    <p class="small text-muted mt-2 mb-0">Scan menggunakan GoPay, OVO, Dana, ShopeePay, atau Mobile Banking</p>
+                    <small class="text-success fw-bold d-block mt-1">
+                        <i class="fa-solid fa-bolt me-1"></i>Sejiwa-Coffee
+                    </small>
                 </div>
 
                 <div class="alert alert-info small d-flex align-items-center mb-4" role="alert">

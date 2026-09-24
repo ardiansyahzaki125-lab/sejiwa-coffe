@@ -1,4 +1,5 @@
 const db = require('../config/database');
+const { generateDynamicQRIS } = require('../utils/qrisHelper');
 
 exports.renderStart = async (req, res) => {
     try {
@@ -74,7 +75,7 @@ exports.processCheckout = async (req, res) => {
 
         const orderId = orderResult.insertId;
 
-        // 2. Insert detail order items (Snapshot harga)
+        // 2. Insert detail order items
         for (const item of items) {
             await connection.query(
                 `INSERT INTO order_items (order_id, menu_id, menu_name, price, quantity, subtotal, notes) 
@@ -91,7 +92,7 @@ exports.processCheckout = async (req, res) => {
 
         await connection.commit();
 
-        // 4. Emit Notifikasi Real-time ke Dashboard Kasir via Socket.IO
+        // 4. Emit Notifikasi Real-time ke Dashboard Kasir
         const [tableData] = await db.query('SELECT table_number FROM tables WHERE id = ?', [customer.table_id]);
         req.io.emit('new_order', {
             order_id: orderId,
@@ -123,9 +124,18 @@ exports.renderPayment = async (req, res) => {
 
         if (orders.length === 0) return res.status(404).send('Pesanan tidak ditemukan');
 
-        res.render('customer/payment', { order: orders[0] });
+        const order = orders[0];
+        const staticQRIS = process.env.QRIS_STATIC_PAYLOAD;
+
+        // Generate QRIS Dinamis Base64 Image
+        let qrisImage = null;
+        if (staticQRIS) {
+            qrisImage = await generateDynamicQRIS(staticQRIS, order.total);
+        }
+
+        res.render('customer/payment', { order, qrisImage });
     } catch (error) {
-        console.error(error);
+        console.error('Error renderPayment:', error);
         res.status(500).send('Server Error');
     }
 };
