@@ -9,17 +9,57 @@
     <style>
         body { background-color: #f4f6f9; min-height: 100vh; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         .sidebar { width: 240px; min-height: 100vh; background: #1e293b; }
-        .sidebar .nav-link { color: #94a3b8; padding: 12px 20px; font-weight: 500; border-radius: 8px; margin-bottom: 4px; }
-        .sidebar .nav-link.active, .sidebar .nav-link:hover { color: #fff; background: #334155; }
-        .content { flex: 1; }
+        .sidebar .nav-link, .offcanvas-body .nav-link { color: #94a3b8; padding: 12px 20px; font-weight: 500; border-radius: 8px; margin-bottom: 4px; }
+        .sidebar .nav-link.active, .sidebar .nav-link:hover,
+        .offcanvas-body .nav-link.active, .offcanvas-body .nav-link:hover { color: #fff; background: #334155; }
+        .content { flex: 1; width: 100%; max-width: 100%; overflow-x: hidden; }
         .table-card { border: none; border-radius: 14px; box-shadow: 0 2px 10px rgba(0,0,0,0.04); transition: transform 0.2s; }
         .table-card:hover { transform: translateY(-2px); }
     </style>
 </head>
 <body>
 
+<!-- Mobile Header / Topbar Navbar (Tampil Hanya di HP) -->
+<nav class="navbar navbar-dark bg-dark d-md-none sticky-top shadow-sm">
+    <div class="container-fluid">
+        <a class="navbar-brand fw-bold text-warning" href="#">
+            <i class="fa-solid fa-mug-hot me-2"></i>SEJIWA
+        </a>
+        <button class="navbar-toggler border-0" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileSidebar">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+    </div>
+</nav>
+
+<!-- Mobile Offcanvas Sidebar Drawer -->
+<div class="offcanvas offcanvas-start bg-dark text-white" id="mobileSidebar" tabindex="-1">
+    <div class="offcanvas-header border-bottom border-secondary">
+        <h5 class="offcanvas-title text-warning fw-bold"><i class="fa-solid fa-mug-hot me-2"></i>SEJIWA</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
+    </div>
+    <div class="offcanvas-body p-3">
+        <ul class="nav flex-column gap-1">
+            <li class="nav-item">
+                <a class="nav-link" href="/admin/dashboard"><i class="fa-solid fa-chart-line me-2"></i>Dashboard</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/admin/orders/history"><i class="fa-solid fa-clock-rotate-left me-2"></i>Riwayat Pesanan</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/admin/menu"><i class="fa-solid fa-utensils me-2"></i>Kelola Menu</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link active" href="/admin/tables"><i class="fa-solid fa-qrcode me-2"></i>Kelola Meja & QR</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link text-danger mt-4" href="/admin/logout"><i class="fa-solid fa-right-from-bracket me-2"></i>Logout</a>
+            </li>
+        </ul>
+    </div>
+</div>
+
 <div class="d-flex">
-    <!-- Sidebar Navigasi Presisi -->
+    <!-- Desktop Sidebar Navigasi -->
     <div class="sidebar p-3 d-none d-md-block">
         <div class="text-center mb-4 pt-2">
             <h4 class="text-warning fw-bold m-0"><i class="fa-solid fa-mug-hot me-2"></i>SEJIWA</h4>
@@ -44,38 +84,38 @@
         </ul>
     </div>
 
-    <!-- Main Content -->
-    <div class="content p-4">
-        <div class="d-flex justify-content-between align-items-center mb-4">
+    <!-- Main Content Area -->
+    <div class="content p-3 p-md-4">
+        <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2 mb-4">
             <div>
-                <h3 class="fw-bold m-0 text-dark">Manajemen Meja & QR Code</h3>
-                <small class="text-muted">Kelola nomor meja pelanggan dan token QR Code pemesanan</small>
+                <h3 class="fw-bold m-0 text-dark">Manajemen Meja & QR</h3>
+                <small class="text-muted">Kelola nomor meja pelanggan & token QR Code</small>
             </div>
-            <button class="btn btn-primary fw-bold" data-bs-toggle="modal" data-bs-target="#addTableModal">
+            <button class="btn btn-primary fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#addTableModal">
                 <i class="fa-solid fa-plus me-1"></i>Tambah Meja Baru
             </button>
         </div>
 
-        <!-- Daftar Kartu Meja -->
+        <!-- Daftar Kartu Meja Grid -->
         <div class="row g-3">
             <% if (tables && tables.length > 0) { %>
                 <% tables.forEach(table => { %>
-                    <div class="col-12 col-md-4 col-lg-3">
-                        <div class="card table-card p-3 bg-white text-center">
+                    <div class="col-6 col-md-4 col-lg-3">
+                        <div class="card table-card p-3 bg-white text-center h-100">
                             <div class="bg-dark text-white rounded-3 py-1 mb-2">
                                 <h6 class="fw-bold m-0">MEJA <%= table.table_number %></h6>
                             </div>
-                            <small class="text-muted d-block mb-3">Token: <%= table.qr_token %></small>
+                            <small class="text-muted d-block mb-3 text-truncate">Token: <%= table.qr_token %></small>
                             
-                            <a href="/admin/tables/qr/<%= table.qr_token %>" class="btn btn-outline-primary btn-sm fw-bold w-100">
-                                <i class="fa-solid fa-qrcode me-1"></i>Lihat / Cetak QR
+                            <a href="/admin/tables/qr/<%= table.qr_token %>" class="btn btn-outline-primary btn-sm fw-bold w-100 mt-auto">
+                                <i class="fa-solid fa-qrcode me-1"></i>Lihat QR
                             </a>
                         </div>
                     </div>
                 <% }); %>
             <% } else { %>
                 <div class="col-12">
-                    <div class="alert alert-secondary text-center py-4 rounded-3 border-0">Belum ada meja terdaftar. Silakan tambah meja baru.</div>
+                    <div class="alert alert-secondary text-center py-4 rounded-3 border-0">Belum ada meja terdaftar.</div>
                 </div>
             <% } %>
         </div>
@@ -84,7 +124,7 @@
 
 <!-- Modal Tambah Meja Baru -->
 <div class="modal fade" id="addTableModal" tabindex="-1">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow">
             <div class="modal-header bg-dark text-white">
                 <h5 class="modal-title fw-bold">Tambah Meja Baru</h5>
@@ -99,7 +139,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-primary fw-bold">Generate QR Meja</button>
+                    <button type="submit" class="btn btn-primary fw-bold">Generate QR</button>
                 </div>
             </form>
         </div>
@@ -107,6 +147,5 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
 </body>
 </html>

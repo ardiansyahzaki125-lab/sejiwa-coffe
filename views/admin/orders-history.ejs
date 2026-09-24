@@ -9,15 +9,55 @@
     <style>
         body { background-color: #f4f6f9; min-height: 100vh; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         .sidebar { width: 240px; min-height: 100vh; background: #1e293b; }
-        .sidebar .nav-link { color: #94a3b8; padding: 12px 20px; font-weight: 500; border-radius: 8px; margin-bottom: 4px; }
-        .sidebar .nav-link.active, .sidebar .nav-link:hover { color: #fff; background: #334155; }
-        .content { flex: 1; }
+        .sidebar .nav-link, .offcanvas-body .nav-link { color: #94a3b8; padding: 12px 20px; font-weight: 500; border-radius: 8px; margin-bottom: 4px; }
+        .sidebar .nav-link.active, .sidebar .nav-link:hover,
+        .offcanvas-body .nav-link.active, .offcanvas-body .nav-link:hover { color: #fff; background: #334155; }
+        .content { flex: 1; width: 100%; max-width: 100%; overflow-x: hidden; }
     </style>
 </head>
 <body>
 
+<!-- Mobile Header / Topbar Navbar -->
+<nav class="navbar navbar-dark bg-dark d-md-none sticky-top shadow-sm">
+    <div class="container-fluid">
+        <a class="navbar-brand fw-bold text-warning" href="#">
+            <i class="fa-solid fa-mug-hot me-2"></i>SEJIWA
+        </a>
+        <button class="navbar-toggler border-0" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileSidebar">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+    </div>
+</nav>
+
+<!-- Mobile Offcanvas Sidebar Drawer -->
+<div class="offcanvas offcanvas-start bg-dark text-white" id="mobileSidebar" tabindex="-1">
+    <div class="offcanvas-header border-bottom border-secondary">
+        <h5 class="offcanvas-title text-warning fw-bold"><i class="fa-solid fa-mug-hot me-2"></i>SEJIWA</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
+    </div>
+    <div class="offcanvas-body p-3">
+        <ul class="nav flex-column gap-1">
+            <li class="nav-item">
+                <a class="nav-link" href="/admin/dashboard"><i class="fa-solid fa-chart-line me-2"></i>Dashboard</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link active" href="/admin/orders/history"><i class="fa-solid fa-clock-rotate-left me-2"></i>Riwayat Pesanan</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/admin/menu"><i class="fa-solid fa-utensils me-2"></i>Kelola Menu</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/admin/tables"><i class="fa-solid fa-qrcode me-2"></i>Kelola Meja & QR</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link text-danger mt-4" href="/admin/logout"><i class="fa-solid fa-right-from-bracket me-2"></i>Logout</a>
+            </li>
+        </ul>
+    </div>
+</div>
+
 <div class="d-flex">
-    <!-- Sidebar Navigasi -->
+    <!-- Desktop Sidebar Navigasi -->
     <div class="sidebar p-3 d-none d-md-block">
         <div class="text-center mb-4 pt-2">
             <h4 class="text-warning fw-bold m-0"><i class="fa-solid fa-mug-hot me-2"></i>SEJIWA</h4>
@@ -42,54 +82,25 @@
         </ul>
     </div>
 
-    <!-- Main Content -->
-    <div class="content p-4">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <div>
-                <h3 class="fw-bold m-0 text-dark">Riwayat & Laporan Pesanan</h3>
-                <small class="text-muted">Cari, kelola, dan cetak ulang laporan transaksi pelanggan</small>
-            </div>
+    <!-- Main Content Area -->
+    <div class="content p-3 p-md-4">
+        <div class="mb-4">
+            <h3 class="fw-bold m-0 text-dark">Riwayat Pesanan</h3>
+            <small class="text-muted">Arsip seluruh transaksi dan pesanan pelanggan</small>
         </div>
 
-        <!-- Filter Bar -->
-        <form method="GET" action="/admin/orders/history" class="card card-body border-0 shadow-sm mb-4">
-            <div class="row g-2">
-                <div class="col-md-4">
-                    <input type="text" name="search" class="form-control" placeholder="Cari Order / Pelanggan" value="<%= query.search || '' %>">
-                </div>
-                <div class="col-md-3">
-                    <select name="status" class="form-select">
-                        <option value="">Semua Status</option>
-                        <option value="PENDING" <%= query.status === 'PENDING' ? 'selected' : '' %>>PENDING</option>
-                        <option value="PROCESSING" <%= query.status === 'PROCESSING' ? 'selected' : '' %>>PROCESSING</option>
-                        <option value="READY" <%= query.status === 'READY' ? 'selected' : '' %>>READY</option>
-                        <option value="COMPLETED" <%= query.status === 'COMPLETED' ? 'selected' : '' %>>COMPLETED</option>
-                        <option value="CANCELLED" <%= query.status === 'CANCELLED' ? 'selected' : '' %>>CANCELLED</option>
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <input type="date" name="date" class="form-control" value="<%= query.date || '' %>">
-                </div>
-                <div class="col-md-2 d-flex gap-1">
-                    <button type="submit" class="btn btn-primary w-100"><i class="fa-solid fa-filter me-1"></i>Filter</button>
-                    <a href="/admin/orders/history" class="btn btn-outline-secondary"><i class="fa-solid fa-rotate"></i></a>
-                </div>
-            </div>
-        </form>
-
         <!-- Tabel Riwayat Pesanan -->
-        <div class="card border-0 shadow-sm">
+        <div class="card border-0 shadow-sm rounded-3">
             <div class="table-responsive">
                 <table class="table table-hover align-middle m-0">
                     <thead class="table-light">
                         <tr>
-                            <th>Order ID</th>
-                            <th>Tanggal & Waktu</th>
+                            <th>No. Order</th>
                             <th>Pelanggan</th>
                             <th>Meja</th>
-                            <th>Total Tagihan</th>
-                            <th>Status Bayar</th>
-                            <th>Status Order</th>
+                            <th>Total</th>
+                            <th>Status Pembayaran</th>
+                            <th>Status Pesanan</th>
                             <th class="text-center">Aksi</th>
                         </tr>
                     </thead>
@@ -97,10 +108,9 @@
                         <% if (orders && orders.length > 0) { %>
                             <% orders.forEach(order => { %>
                                 <tr>
-                                    <td class="fw-bold text-primary">#<%= order.order_number %></td>
-                                    <td><small><%= new Date(order.created_at).toLocaleString('id-ID') %></small></td>
-                                    <td class="fw-bold"><%= order.customer_name %></td>
-                                    <td><span class="badge bg-secondary">Meja <%= order.table_number %></span></td>
+                                    <td><span class="badge bg-secondary">#<%= order.order_number %></span></td>
+                                    <td class="fw-bold text-dark"><%= order.customer_name %></td>
+                                    <td>Meja <%= order.table_number %></td>
                                     <td class="fw-bold text-success">Rp <%= Number(order.total).toLocaleString('id-ID') %></td>
                                     <td>
                                         <span class="badge <%= order.payment_status === 'PAID' ? 'bg-success' : 'bg-warning text-dark' %>">
@@ -108,23 +118,21 @@
                                         </span>
                                     </td>
                                     <td>
-                                        <span class="badge bg-info text-dark"><%= order.order_status %></span>
+                                        <span class="badge <%= order.order_status === 'COMPLETED' ? 'bg-success' : 'bg-primary' %>">
+                                            <%= order.order_status %>
+                                        </span>
                                     </td>
                                     <td class="text-center">
-                                        <button onclick="showDetail('<%= order.id %>')" class="btn btn-outline-primary btn-sm me-1" title="Detail">
-                                            <i class="fa-solid fa-eye me-1"></i>Detail
-                                        </button>
-                                        <a href="/admin/order/<%= order.id %>/receipt" target="_blank" class="btn btn-outline-secondary btn-sm me-1" title="Cetak Struk">
-                                            <i class="fa-solid fa-print"></i>
+                                        <a href="/admin/order/<%= order.id %>/detail" class="btn btn-sm btn-outline-dark fw-bold">
+                                            <i class="fa-solid fa-eye"></i> Detail
                                         </a>
-                                        <button onclick="deleteOrder('<%= order.id %>')" class="btn btn-outline-danger btn-sm" title="Hapus Pesanan">
-                                            <i class="fa-solid fa-trash"></i>
-                                        </button>
                                     </td>
                                 </tr>
                             <% }); %>
                         <% } else { %>
-                            <tr><td colspan="8" class="text-center py-4 text-muted">Tidak ada riwayat pesanan.</td></tr>
+                            <tr>
+                                <td colspan="7" class="text-center py-4 text-muted">Belum ada riwayat pesanan.</td>
+                            </tr>
                         <% } %>
                     </tbody>
                 </table>
@@ -133,84 +141,6 @@
     </div>
 </div>
 
-<!-- Modal Detail Pesanan -->
-<div class="modal fade" id="detailModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content border-0 shadow">
-            <div class="modal-header bg-dark text-white">
-                <h5 class="modal-title fw-bold" id="modalOrderNumber">Detail Pesanan</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <div class="mb-3 p-2 bg-light rounded border">
-                    <small class="text-muted d-block">Pelanggan: <strong id="modalCustomer" class="text-dark"></strong></small>
-                    <small class="text-muted d-block">Meja: <strong id="modalTable" class="text-dark"></strong></small>
-                </div>
-                <h6 class="fw-bold border-bottom pb-2">Rincian Menu:</h6>
-                <ul class="list-group list-group-flush mb-3" id="modalItemList"></ul>
-                <div class="d-flex justify-content-between border-top pt-2 fw-bold fs-5">
-                    <span>Total Tagihan:</span>
-                    <span class="text-success" id="modalTotal"></span>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-    const detailModal = new bootstrap.Modal(document.getElementById('detailModal'));
-
-    async function showDetail(orderId) {
-        try {
-            const res = await fetch(`/admin/order/${orderId}/detail`);
-            const data = await res.json();
-            
-            if (data.success) {
-                document.getElementById('modalOrderNumber').innerText = `Order #${data.order.order_number}`;
-                document.getElementById('modalCustomer').innerText = data.order.customer_name;
-                document.getElementById('modalTable').innerText = `Meja ${data.order.table_number}`;
-                document.getElementById('modalTotal').innerText = `Rp ${Number(data.order.total).toLocaleString('id-ID')}`;
-
-                const itemList = document.getElementById('modalItemList');
-                itemList.innerHTML = '';
-                data.items.forEach(item => {
-                    itemList.innerHTML += `
-                        <li class="list-group-item d-flex justify-content-between align-items-center px-0">
-                            <div>
-                                <strong class="text-primary">${item.quantity}x</strong> ${item.menu_name}
-                                ${item.notes ? `<small class="d-block text-danger fst-italic">Note: ${item.notes}</small>` : ''}
-                            </div>
-                            <span class="fw-bold">Rp ${Number(item.subtotal).toLocaleString('id-ID')}</span>
-                        </li>
-                    `;
-                });
-
-                detailModal.show();
-            }
-        } catch (err) {
-            console.error(err);
-        }
-    }
-
-    async function deleteOrder(orderId) {
-        if (!confirm('Apakah Anda yakin ingin menghapus pesanan ini secara permanen dari riwayat?')) return;
-        try {
-            const res = await fetch(`/admin/order/${orderId}/delete`, {
-                method: 'DELETE'
-            });
-            const data = await res.json();
-            if (data.success) {
-                window.location.reload();
-            } else {
-                alert(data.message || 'Gagal menghapus pesanan');
-            }
-        } catch (err) {
-            console.error('Error deleteOrder:', err);
-            alert('Terjadi kesalahan koneksi server');
-        }
-    }
-</script>
-
 </body>
 </html>

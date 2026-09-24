@@ -3,26 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Operational Kasir - Sejiwa Coffee</title>
+    <title>Dashboard Operasional - Sejiwa Coffee</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         body { background-color: #f4f6f9; min-height: 100vh; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         .sidebar { width: 240px; min-height: 100vh; background: #1e293b; }
-        .sidebar .nav-link { color: #94a3b8; padding: 12px 20px; font-weight: 500; border-radius: 8px; margin-bottom: 4px; }
-        .sidebar .nav-link.active, .sidebar .nav-link:hover { color: #fff; background: #334155; }
-        .content { flex: 1; }
-        .stat-card { border: none; border-radius: 12px; }
-        .order-card { border: none; border-radius: 14px; box-shadow: 0 2px 12px rgba(0,0,0,0.04); transition: transform 0.2s; }
-        .order-card:hover { transform: translateY(-2px); }
-        .accordion-button:not(.collapsed) { background-color: #e2e8f0; color: #0f172a; }
-        .accordion-button:focus { box-shadow: none; }
+        .sidebar .nav-link, .offcanvas-body .nav-link { color: #94a3b8; padding: 12px 20px; font-weight: 500; border-radius: 8px; margin-bottom: 4px; }
+        .sidebar .nav-link.active, .sidebar .nav-link:hover,
+        .offcanvas-body .nav-link.active, .offcanvas-body .nav-link:hover { color: #fff; background: #334155; }
+        .content { flex: 1; width: 100%; max-width: 100%; overflow-x: hidden; }
+        .stat-card { border: none; border-radius: 14px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); transition: transform 0.2s; }
+        .stat-card:hover { transform: translateY(-2px); }
     </style>
 </head>
 <body>
 
+<!-- Mobile Header / Topbar Navbar (Tampil Hanya di HP) -->
+<nav class="navbar navbar-dark bg-dark d-md-none sticky-top shadow-sm">
+    <div class="container-fluid">
+        <a class="navbar-brand fw-bold text-warning" href="#">
+            <i class="fa-solid fa-mug-hot me-2"></i>SEJIWA
+        </a>
+        <button class="navbar-toggler border-0" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileSidebar">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+    </div>
+</nav>
+
+<!-- Mobile Offcanvas Sidebar Drawer (Pengganti Sidebar Desktop) -->
+<div class="offcanvas offcanvas-start bg-dark text-white" id="mobileSidebar" tabindex="-1">
+    <div class="offcanvas-header border-bottom border-secondary">
+        <h5 class="offcanvas-title text-warning fw-bold"><i class="fa-solid fa-mug-hot me-2"></i>SEJIWA</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
+    </div>
+    <div class="offcanvas-body p-3">
+        <ul class="nav flex-column gap-1">
+            <li class="nav-item">
+                <a class="nav-link active" href="/admin/dashboard"><i class="fa-solid fa-chart-line me-2"></i>Dashboard</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/admin/orders/history"><i class="fa-solid fa-clock-rotate-left me-2"></i>Riwayat Pesanan</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/admin/menu"><i class="fa-solid fa-utensils me-2"></i>Kelola Menu</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/admin/tables"><i class="fa-solid fa-qrcode me-2"></i>Kelola Meja & QR</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link text-danger mt-4" href="/admin/logout"><i class="fa-solid fa-right-from-bracket me-2"></i>Logout</a>
+            </li>
+        </ul>
+    </div>
+</div>
+
 <div class="d-flex">
-    <!-- Sidebar Navigasi -->
+    <!-- Desktop Sidebar Navigasi -->
     <div class="sidebar p-3 d-none d-md-block">
         <div class="text-center mb-4 pt-2">
             <h4 class="text-warning fw-bold m-0"><i class="fa-solid fa-mug-hot me-2"></i>SEJIWA</h4>
@@ -47,197 +84,83 @@
         </ul>
     </div>
 
-    <!-- Main Content -->
-    <div class="content p-4">
-        <div class="d-flex justify-content-between align-items-center mb-4">
+    <!-- Main Content Area -->
+    <div class="content p-3 p-md-4">
+        <!-- Dashboard Header -->
+        <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2 mb-4">
             <div>
                 <h3 class="fw-bold m-0 text-dark">Dashboard Operasional</h3>
                 <small class="text-muted">Pantau & kelola pesanan masuk secara akurat</small>
             </div>
-            <span class="badge bg-dark px-3 py-2"><i class="fa-solid fa-calendar me-1"></i> Hari Ini</span>
-        </div>
-
-        <!-- Ringkasan Statistik -->
-        <div class="row g-3 mb-4">
-            <div class="col-6 col-md-3">
-                <div class="card stat-card bg-warning text-dark p-3 shadow-sm">
-                    <small class="fw-semibold">Menunggu Verifikasi</small>
-                    <h2 class="fw-bold m-0"><%= (summary && summary.waiting_verify) ? summary.waiting_verify : 0 %></h2>
-                </div>
-            </div>
-            <div class="col-6 col-md-3">
-                <div class="card stat-card bg-primary text-white p-3 shadow-sm">
-                    <small class="fw-semibold">Diproses Dapur</small>
-                    <h2 class="fw-bold m-0"><%= (summary && summary.processing) ? summary.processing : 0 %></h2>
-                </div>
-            </div>
-            <div class="col-6 col-md-3">
-                <div class="card stat-card bg-info text-white p-3 shadow-sm">
-                    <small class="fw-semibold">Siap Disajikan</small>
-                    <h2 class="fw-bold m-0"><%= (summary && summary.ready) ? summary.ready : 0 %></h2>
-                </div>
-            </div>
-            <div class="col-6 col-md-3">
-                <div class="card stat-card bg-success text-white p-3 shadow-sm">
-                    <small class="fw-semibold">Selesai Hari Ini</small>
-                    <h2 class="fw-bold m-0"><%= (summary && summary.completed) ? summary.completed : 0 %></h2>
-                </div>
+            <div>
+                <span class="btn btn-dark btn-sm fw-bold shadow-sm">
+                    <i class="fa-solid fa-calendar-day me-1 text-warning"></i> Hari Ini
+                </span>
             </div>
         </div>
 
-        <h5 class="fw-bold mb-3 text-dark"><i class="fa-solid fa-bell me-2 text-warning"></i>Pesanan Aktif</h5>
+        <!-- 4 Kartu Statistik Ringkas Grid System -->
+        <div class="row g-2 g-md-3 mb-4">
+            <div class="col-6 col-md-3">
+                <div class="card stat-card p-3 bg-warning text-dark h-100">
+                    <small class="fw-bold d-block mb-1 text-truncate">Menunggu Verifikasi</small>
+                    <h2 class="fw-bold m-0"><%= stats ? stats.pendingVerification : 0 %></h2>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="card stat-card p-3 bg-primary text-white h-100">
+                    <small class="fw-bold d-block mb-1 text-truncate">Diproses Dapur</small>
+                    <h2 class="fw-bold m-0"><%= stats ? stats.inKitchen : 0 %></h2>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="card stat-card p-3 bg-info text-white h-100">
+                    <small class="fw-bold d-block mb-1 text-truncate">Siap Disajikan</small>
+                    <h2 class="fw-bold m-0"><%= stats ? stats.readyToServe : 0 %></h2>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="card stat-card p-3 bg-success text-white h-100">
+                    <small class="fw-bold d-block mb-1 text-truncate">Selesai Hari Ini</small>
+                    <h2 class="fw-bold m-0"><%= stats ? stats.completedToday : 0 %></h2>
+                </div>
+            </div>
+        </div>
 
-        <!-- Daftar Kartu Pesanan -->
-        <div class="row g-3" id="orders-container">
-            <% if (orders && orders.length > 0) { %>
-                <% orders.forEach(order => { %>
-                    <div class="col-12 col-md-6 col-lg-4" id="order-card-<%= order.id %>">
-                        <div class="card order-card p-3 bg-white">
-                            <!-- Header Card -->
-                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                <span class="badge bg-secondary">#<%= order.order_number %></span>
-                                <div>
-                                    <span class="badge bg-dark me-1">Meja <%= order.table_number %></span>
-                                    <button onclick="deleteOrder('<%= order.id %>')" class="btn btn-sm btn-outline-danger py-0 px-1" title="Hapus Pesanan Coba-coba">
-                                        <i class="fa-solid fa-trash-can"></i>
-                                    </button>
+        <!-- Section Pesanan Aktif -->
+        <div class="card border-0 shadow-sm rounded-3 p-3 p-md-4">
+            <h5 class="fw-bold text-dark mb-3"><i class="fa-solid fa-bell text-warning me-2"></i>Pesanan Aktif</h5>
+            
+            <div class="row g-3" id="active-orders-container">
+                <% if (activeOrders && activeOrders.length > 0) { %>
+                    <% activeOrders.forEach(order => { %>
+                        <div class="col-12 col-md-6 col-lg-4" id="order-card-<%= order.id %>">
+                            <div class="card border-0 shadow-sm p-3 rounded-3 bg-light">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="badge bg-dark">Meja <%= order.table_number %></span>
+                                    <small class="text-muted">#<%= order.order_number %></small>
                                 </div>
-                            </div>
-
-                            <div class="d-flex justify-content-between align-items-baseline">
-                                <h5 class="fw-bold m-0 text-dark"><%= order.customer_name %></h5>
-                                <small class="text-muted"><%= new Date(order.created_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) %></small>
-                            </div>
-
-                            <!-- Accordion Detail Menu -->
-                            <div class="accordion my-3" id="accordionOrder<%= order.id %>">
-                                <div class="accordion-item border-0 bg-light rounded">
-                                    <h2 class="accordion-header">
-                                        <button class="accordion-button collapsed py-2 px-3 small fw-bold text-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#collapse<%= order.id %>">
-                                            <i class="fa-solid fa-utensils me-2"></i>Lihat Menu (<%= order.items ? order.items.length : 0 %> Item)
-                                        </button>
-                                    </h2>
-                                    <div id="collapse<%= order.id %>" class="accordion-collapse collapse" data-bs-parent="#accordionOrder<%= order.id %>">
-                                        <div class="accordion-body p-2 bg-white small border-top">
-                                            <ul class="list-unstyled m-0">
-                                                <% if (order.items && order.items.length > 0) { %>
-                                                    <% order.items.forEach(item => { %>
-                                                        <li class="d-flex justify-content-between align-items-start mb-1 pb-1 border-bottom">
-                                                            <div>
-                                                                <span class="fw-bold text-primary"><%= item.quantity %>x</span> <%= item.menu_name %>
-                                                                <% if (item.notes) { %>
-                                                                    <small class="d-block text-danger fst-italic">*( <%= item.notes %> )</small>
-                                                                <% } %>
-                                                            </div>
-                                                            <span class="text-muted ms-2">Rp <%= Number(item.subtotal).toLocaleString('id-ID') %></span>
-                                                        </li>
-                                                    <% }); %>
-                                                <% } else { %>
-                                                    <li class="text-muted fst-italic">Tidak ada detail menu.</li>
-                                                <% } %>
-                                            </ul>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="d-flex justify-content-between align-items-center mb-3">
-                                <span class="fw-semibold text-muted">Total Tagihan:</span>
-                                <h4 class="fw-bold text-success m-0">Rp <%= Number(order.total).toLocaleString('id-ID') %></h4>
-                            </div>
-
-                            <!-- Tombol Aksi Verifikasi & Status -->
-                            <div class="d-grid gap-2">
-                                <% if (order.payment_status === 'WAITING_VERIFICATION') { %>
-                                    <div class="btn-group w-100">
-                                        <button onclick="verifyPayment('<%= order.id %>', 'approve')" class="btn btn-success btn-sm fw-bold py-2"><i class="fa-solid fa-check me-1"></i>Verifikasi</button>
-                                        <button onclick="verifyPayment('<%= order.id %>', 'reject')" class="btn btn-danger btn-sm fw-bold py-2"><i class="fa-solid fa-xmark me-1"></i>Tolak</button>
-                                    </div>
-                                <% } else if (order.order_status === 'PENDING' || order.order_status === 'PROCESSING') { %>
-                                    <button onclick="updateStatus('<%= order.id %>', 'READY')" class="btn btn-info text-white btn-sm fw-bold py-2"><i class="fa-solid fa-bell me-1"></i>Siap Disajikan</button>
-                                <% } else if (order.order_status === 'READY') { %>
-                                    <button onclick="updateStatus('<%= order.id %>', 'COMPLETED')" class="btn btn-dark btn-sm fw-bold py-2"><i class="fa-solid fa-flag-checkered me-1"></i>Selesaikan Pesanan</button>
-                                <% } %>
-
-                                <a href="/admin/order/<%= order.id %>/receipt" target="_blank" class="btn btn-outline-secondary btn-sm"><i class="fa-solid fa-print me-1"></i>Cetak Struk</a>
+                                <h6 class="fw-bold text-dark mb-1"><%= order.customer_name %></h6>
+                                <h5 class="fw-bold text-success mb-3">Rp <%= Number(order.total).toLocaleString('id-ID') %></h5>
+                                <a href="/admin/order/<%= order.id %>/detail" class="btn btn-outline-dark btn-sm fw-bold w-100">
+                                    <i class="fa-solid fa-eye me-1"></i>Lihat Pesanan
+                                </a>
                             </div>
                         </div>
+                    <% }); %>
+                <% } else { %>
+                    <div class="col-12">
+                        <div class="alert alert-secondary text-center py-4 rounded-3 border-0 m-0">
+                            Tidak ada pesanan aktif saat ini.
+                        </div>
                     </div>
-                <% }); %>
-            <% } else { %>
-                <div class="col-12">
-                    <div class="alert alert-secondary text-center py-4 rounded-3 border-0">Tidak ada pesanan aktif saat ini.</div>
-                </div>
-            <% } %>
+                <% } %>
+            </div>
         </div>
     </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script src="/socket.io/socket.io.js"></script>
-<script>
-    const socket = io();
-
-    socket.on('new_order', () => window.location.reload());
-    socket.on('order_status_updated', () => window.location.reload());
-
-    async function verifyPayment(orderId, action) {
-        if (!confirm('Proses verifikasi pembayaran pesanan ini?')) return;
-        try {
-            const res = await fetch(`/admin/order/${orderId}/verify-payment`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action })
-            });
-            const data = await res.json();
-            if (data.success) {
-                window.location.reload();
-            } else {
-                alert(data.message || 'Gagal memproses verifikasi');
-            }
-        } catch (err) {
-            console.error('Error verifyPayment:', err);
-            alert('Terjadi kesalahan koneksi server');
-        }
-    }
-
-    async function updateStatus(orderId, status) {
-        try {
-            const res = await fetch(`/admin/order/${orderId}/update-status`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ status })
-            });
-            const data = await res.json();
-            if (data.success) {
-                window.location.reload();
-            } else {
-                alert(data.message || 'Gagal mengubah status');
-            }
-        } catch (err) {
-            console.error('Error updateStatus:', err);
-            alert('Terjadi kesalahan koneksi server');
-        }
-    }
-
-    async function deleteOrder(orderId) {
-        if (!confirm('Hapus pesanan ini secara permanen dari database?')) return;
-        try {
-            const res = await fetch(`/admin/order/${orderId}/delete`, {
-                method: 'DELETE'
-            });
-            const data = await res.json();
-            if (data.success) {
-                window.location.reload();
-            } else {
-                alert(data.message || 'Gagal menghapus pesanan');
-            }
-        } catch (err) {
-            console.error('Error deleteOrder:', err);
-            alert('Terjadi kesalahan koneksi server');
-        }
-    }
-</script>
 
 </body>
 </html>
