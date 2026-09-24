@@ -123,7 +123,14 @@
                                         </span>
                                     </td>
                                     <td class="text-center">
-                                        <button class="btn btn-sm btn-outline-primary me-1" onclick='openEditModal(<%- JSON.stringify(item) %>)' title="Edit">
+                                        <button class="btn btn-sm btn-outline-primary me-1 btn-edit-menu" 
+                                                data-id="<%= item.id %>" 
+                                                data-name="<%= item.name %>" 
+                                                data-category="<%= item.category_id %>" 
+                                                data-price="<%= item.price %>" 
+                                                data-status="<%= item.status %>" 
+                                                data-image="<%= item.image || '' %>" 
+                                                title="Edit">
                                             <i class="fa-solid fa-pen"></i> Edit
                                         </button>
                                         <button class="btn btn-sm btn-outline-danger" onclick="deleteMenu('<%= item.id %>')" title="Hapus">
@@ -294,16 +301,21 @@
         }
     });
 
-    // Buka Modal Edit & Isikan Data
-    function openEditModal(item) {
-        document.getElementById('edit_id').value = item.id;
-        document.getElementById('edit_name').value = item.name;
-        document.getElementById('edit_category_id').value = item.category_id;
-        document.getElementById('edit_price').value = item.price;
-        document.getElementById('edit_existing_image').value = item.image || '';
-        document.getElementById('edit_status').value = item.status;
-        editModal.show();
-    }
+    // Event Listener Tombol Edit (Aman dari sintaks EJS)
+    document.addEventListener('click', function (e) {
+        const editBtn = e.target.closest('.btn-edit-menu');
+        if (editBtn) {
+            document.getElementById('edit_id').value = editBtn.dataset.id;
+            document.getElementById('edit_name').value = editBtn.dataset.name;
+            document.getElementById('edit_category_id').value = editBtn.dataset.category;
+            document.getElementById('edit_price').value = editBtn.dataset.price;
+            document.getElementById('edit_status').value = editBtn.dataset.status;
+            if (document.getElementById('edit_existing_image')) {
+                document.getElementById('edit_existing_image').value = editBtn.dataset.image;
+            }
+            editModal.show();
+        }
+    });
 
     // Submit Form Edit via FormData
     document.getElementById('editMenuForm').addEventListener('submit', async (e) => {
