@@ -1,0 +1,33 @@
+/* public/css/style.css */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f8f9fa;
+}
+
+.navbar-brand {
+    letter-spacing: 0.5px;
+}
+
+.min-vh-75 {
+    min-height: 65vh;
+}
+
+/* Kartu dan tombol yang lebih elegan */
+.card {
+    border-radius: 12px;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.btn {
+    border-radius: 8px;
+}
+
+/* Responsif untuk tampilan HP */
+@media (max-width: 991.98px) {
+    .navbar-collapse {
+        background-color: #212529;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-top: 10px;
+    }
+}

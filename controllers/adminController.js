@@ -36,40 +36,43 @@ exports.logout = (req, res) => {
     });
 };
 
-// 2. Dashboard Operations
+// Contoh Perbaikan renderDashboard di controllers/adminController.js
 exports.renderDashboard = async (req, res) => {
     try {
-        const [newOrders] = await db.query(
-            `SELECT o.*, t.table_number FROM orders o 
-             JOIN tables t ON o.table_id = t.id 
-             WHERE o.order_status NOT IN ('COMPLETED', 'CANCELLED') 
-             ORDER BY o.created_at DESC`
-        );
+        // 1. Ambil data statistik pesanan dari database
+        const [pendingVerif] = await db.query('SELECT COUNT(*) as count FROM orders WHERE payment_status = "WAITING_VERIFICATION"');
+        const [inKitchen] = await db.query('SELECT COUNT(*) as count FROM orders WHERE order_status = "COOKING"');
+        const [readyServe] = await db.query('SELECT COUNT(*) as count FROM orders WHERE order_status = "READY"');
+        const [completedToday] = await db.query('SELECT COUNT(*) as count FROM orders WHERE order_status = "COMPLETED" AND DATE(created_at) = CURDATE()');
 
-        if (newOrders.length > 0) {
-            const orderIds = newOrders.map(order => order.id);
-            const [items] = await db.query(`SELECT * FROM order_items WHERE order_id IN (?)`, [orderIds]);
-            newOrders.forEach(order => {
-                order.items = items.filter(item => item.order_id === order.id);
-            });
-        }
-
-        const [counts] = await db.query(`
-            SELECT 
-                SUM(CASE WHEN payment_status = 'WAITING_VERIFICATION' AND order_status NOT IN ('COMPLETED', 'CANCELLED') THEN 1 ELSE 0 END) as waiting_verify,
-                SUM(CASE WHEN order_status = 'PROCESSING' THEN 1 ELSE 0 END) as processing,
-                SUM(CASE WHEN order_status = 'READY' THEN 1 ELSE 0 END) as ready,
-                SUM(CASE WHEN order_status = 'COMPLETED' AND DATE(created_at) = CURDATE() THEN 1 ELSE 0 END) as completed
-            FROM orders
+        // 2. Ambil daftar pesanan aktif
+        const [activeOrders] = await db.query(`
+            SELECT o.*, t.table_number FROM orders o 
+            JOIN tables t ON o.table_id = t.id 
+            WHERE o.order_status != "COMPLETED" AND o.order_status != "CANCELLED" 
+            ORDER BY o.id DESC
         `);
 
-        res.render('admin/dashboard', { orders: newOrders, summary: counts[0] || {} });
+        // 3. Susun objek stats
+        const stats = {
+            pendingVerification: pendingVerif[0].count,
+            inKitchen: inKitchen[0].count,
+            readyToServe: readyServe[0].count,
+            completedToday: completedToday[0].count
+        };
+
+        // 4. Render ke view dengan mengirim variabel stats dan activeOrders
+        res.render('admin/dashboard', { 
+            stats, 
+            activeOrders, 
+            admin: req.session.user 
+        });
+
     } catch (error) {
         console.error('Error renderDashboard:', error);
         res.status(500).send('Server Error');
     }
 };
-
 // 3. Verifikasi Pembayaran (Approve / Reject)
 exports.verifyPayment = async (req, res) => {
     try {
