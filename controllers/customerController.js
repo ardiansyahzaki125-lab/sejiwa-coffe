@@ -127,7 +127,6 @@ exports.renderPayment = async (req, res) => {
         const order = orders[0];
         const staticQRIS = process.env.QRIS_STATIC_PAYLOAD;
 
-        // Generate QRIS Dinamis Base64 Image
         let qrisImage = null;
         if (staticQRIS) {
             qrisImage = await generateDynamicQRIS(staticQRIS, order.total);
