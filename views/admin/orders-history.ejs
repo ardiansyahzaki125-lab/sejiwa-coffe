@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Riwayat Pesanan - Sejiwa Coffee</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { background-color: #f8f9fa; }
+        .sidebar { min-height: 100vh; background-color: #2c3e50; color: #fff; }
+        .sidebar a { color: #ecf0f1; text-decoration: none; padding: 12px 20px; display: block; }
+        .sidebar a:hover, .sidebar a.active { background-color: #34495e; border-left: 4px solid #e67e22; }
+        .table-responsive { background: #fff; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .filter-card { border: none; border-radius: 12px; background: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.04); }
+    </style>
+</head>
+<body>
+
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar Navigation -->
+        <nav class="col-md-3 col-lg-2 d-md-block sidebar collapse p-0">
+            <div class="p-3 text-center border-bottom border-secondary">
+                <h4 class="fw-bold m-0 text-warning"><i class="fa-solid fa-mug-hot me-2"></i>SEJIWA</h4>
+                <small class="text-muted">Cashier System</small>
+            </div>
+            <div class="py-3">
+                <a href="/admin/dashboard"><i class="fa-solid fa-chart-line me-2"></i> Dashboard</a>
+                <a href="/admin/orders/history" class="active"><i class="fa-solid fa-clock-rotate-left me-2"></i> Riwayat Pesanan</a>
+                <a href="/admin/menu"><i class="fa-solid fa-utensils me-2"></i> Kelola Menu</a>
+                <a href="/admin/tables"><i class="fa-solid fa-qrcode me-2"></i> Kelola Meja & QR</a>
+                <a href="/admin/logout" class="text-danger mt-4"><i class="fa-solid fa-right-from-bracket me-2"></i> Logout</a>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+                <h1 class="h3 fw-bold">Riwayat & Laporan Pesanan</h1>
+            </div>
+
+            <!-- Form Search & Filter -->
+            <div class="card filter-card p-3 mb-4">
+                <form action="/admin/orders/history" method="GET" class="row g-2 align-items-center">
+                    <div class="col-12 col-md-4">
+                        <label class="form-label small fw-bold mb-1">Cari Order / Pelanggan</label>
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-text"><i class="fa-solid fa-magnifying-glass"></i></span>
+                            <input type="text" name="search" class="form-control" placeholder="Contoh: SJW-000125 atau Zaki" value="<%= query.search || '' %>">
+                        </div>
+                    </div>
+                    <div class="col-12 col-sm-6 col-md-3">
+                        <label class="form-label small fw-bold mb-1">Status Pesanan</label>
+                        <select name="status" class="form-select form-select-sm">
+                            <option value="">Semua Status</option>
+                            <option value="PROCESSING" <%= query.status === 'PROCESSING' ? 'selected' : '' %>>Diproses</option>
+                            <option value="READY" <%= query.status === 'READY' ? 'selected' : '' %>>Siap</option>
+                            <option value="COMPLETED" <%= query.status === 'COMPLETED' ? 'selected' : '' %>>Selesai</option>
+                            <option value="CANCELLED" <%= query.status === 'CANCELLED' ? 'selected' : '' %>>Dibatalkan</option>
+                        </select>
+                    </div>
+                    <div class="col-12 col-sm-6 col-md-3">
+                        <label class="form-label small fw-bold mb-1">Tanggal Transaksi</label>
+                        <input type="date" name="date" class="form-control form-control-sm" value="<%= query.date || '' %>">
+                    </div>
+                    <div class="col-12 col-md-2 d-flex gap-1 align-self-end mt-2 mt-md-0">
+                        <button type="submit" class="btn btn-sm btn-primary fw-bold w-100"><i class="fa-solid fa-filter me-1"></i> Filter</button>
+                        <a href="/admin/orders/history" class="btn btn-sm btn-outline-secondary"><i class="fa-solid fa-rotate"></i></a>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Order Table -->
+            <div class="table-responsive p-3">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Tanggal & Waktu</th>
+                            <th>Pelanggan</th>
+                            <th>Meja</th>
+                            <th>Total Tagihan</th>
+                            <th>Status Pembayaran</th>
+                            <th>Status Pesanan</th>
+                            <th class="text-end">Cetak Nota</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% if(orders.length === 0) { %>
+                            <tr><td colspan="8" class="text-center py-4 text-muted">Tidak ada data riwayat transaksi yang ditemukan.</td></tr>
+                        <% } else { %>
+                            <% orders.forEach(order => { %>
+                                <tr>
+                                    <td class="fw-bold text-primary">#<%= order.order_number %></td>
+                                    <td class="small text-muted"><%= new Date(order.created_at).toLocaleString('id-ID') %></td>
+                                    <td class="fw-bold"><%= order.customer_name %></td>
+                                    <td><span class="badge bg-secondary">Meja <%= order.table_number %></span></td>
+                                    <td class="fw-bold text-success">Rp <%= Number(order.total).toLocaleString('id-ID') %></td>
+                                    <td>
+                                        <% if(order.payment_status === 'PAID') { %>
+                                            <span class="badge bg-success">Lunas</span>
+                                        <% } else if(order.payment_status === 'WAITING_VERIFICATION') { %>
+                                            <span class="badge bg-warning text-dark">Menunggu Verifikasi</span>
+                                        <% } else { %>
+                                            <span class="badge bg-danger"><%= order.payment_status %></span>
+                                        <% } %>
+                                    </td>
+                                    <td>
+                                        <% if(order.order_status === 'COMPLETED') { %>
+                                            <span class="badge bg-dark">Selesai</span>
+                                        <% } else if(order.order_status === 'CANCELLED') { %>
+                                            <span class="badge bg-danger">Dibatalkan</span>
+                                        <% } else { %>
+                                            <span class="badge bg-info text-dark"><%= order.order_status %></span>
+                                        <% } %>
+                                    </td>
+                                    <td class="text-end">
+                                        <a href="/admin/orders/<%= order.id %>/print" target="_blank" class="btn btn-sm btn-outline-dark">
+                                            <i class="fa-solid fa-print me-1"></i> Nota
+                                        </a>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        <% } %>
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
