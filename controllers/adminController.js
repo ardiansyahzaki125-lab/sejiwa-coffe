@@ -262,6 +262,25 @@ exports.createTable = async (req, res) => {
     }
 };
 
+// Render Halaman Kelola Menu
+exports.renderMenus = async (req, res) => {
+    try {
+        const [menus] = await db.query(`
+            SELECT m.*, c.name as category_name, c.type as category_type 
+            FROM menus m 
+            LEFT JOIN categories c ON m.category_id = c.id 
+            ORDER BY m.name ASC
+        `);
+        
+        const [categories] = await db.query('SELECT * FROM categories ORDER BY name ASC');
+
+        res.render('admin/menu', { menus, categories });
+    } catch (error) {
+        console.error('Error renderMenus:', error);
+        res.status(500).send('Server Error');
+    }
+};
+
 // Fallback Handlers untuk Menu & Tables
 exports.renderMenus = async (req, res) => {
     try {

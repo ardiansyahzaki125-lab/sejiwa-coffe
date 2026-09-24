@@ -4,236 +4,304 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Menu - Sejiwa Coffee</title>
-    <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { background-color: #fafafa; padding-bottom: 100px; }
-        .header-bg { background-color: #2c3e50; color: #fff; border-radius: 0 0 20px 20px; }
-        .menu-card { border: none; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.06); transition: transform 0.2s; }
-        .menu-card:hover { transform: translateY(-3px); }
-        .menu-img { height: 140px; object-fit: cover; }
-        .category-btn { border-radius: 20px; font-weight: 500; }
-        .cart-bar { position: fixed; bottom: 0; left: 0; right: 0; background: #fff; border-top: 1px solid #e0e0e0; box-shadow: 0 -4px 10px rgba(0,0,0,0.1); z-index: 1000; }
+        body { background-color: #f8f9fa; padding-bottom: 90px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .category-scroll { overflow-x: auto; whitespace: nowrap; scrollbar-width: none; }
+        .category-scroll::-webkit-scrollbar { display: none; }
+        .menu-card { border: none; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); transition: transform 0.2s; }
+        .menu-card:active { transform: scale(0.98); }
+        .cart-bar { position: fixed; bottom: 0; left: 0; right: 0; background: #1e293b; color: #fff; border-top-left-radius: 16px; border-top-right-radius: 16px; z-index: 1030; }
     </style>
 </head>
 <body>
 
-<!-- Header Info Pelanggan -->
-<div class="header-bg p-4 mb-3">
-    <div class="d-flex justify-content-between align-items-center">
-        <div>
-            <h4 class="fw-bold m-0"><i class="fa-solid fa-mug-hot text-warning me-2"></i>Sejiwa Coffee</h4>
-            <small class="text-light">Halo, <strong><%= customer.name %></strong> 👋</small>
-        </div>
-        <span class="badge bg-warning text-dark fs-6 px-3 py-2">Meja <%= table.table_number %></span>
+<!-- Header Top Navbar -->
+<nav class="navbar navbar-dark bg-dark sticky-top shadow-sm">
+    <div class="container d-flex justify-content-between align-items-center">
+        <a class="navbar-brand fw-bold m-0" href="#">
+            <i class="fa-solid fa-mug-hot text-warning me-2"></i>Sejiwa Coffee
+        </a>
+        <span class="badge bg-warning text-dark px-3 py-2 rounded-pill fw-bold">
+            <i class="fa-solid fa-chair me-1"></i>Meja <%= table ? table.table_number : '-' %>
+        </span>
     </div>
-</div>
+</nav>
 
-<div class="container">
-    <!-- Filter Kategori -->
-    <div class="d-flex overflow-auto gap-2 pb-3 mb-2" id="category-bar">
-        <button class="btn btn-dark category-btn active" onclick="filterCategory('all', this)">Semua</button>
-        <% categories.forEach(cat => { %>
-            <button class="btn btn-outline-dark category-btn" onclick="filterCategory('<%= cat.id %>', this)"><%= cat.name %></button>
-        <% }) %>
+<div class="container py-3">
+    <!-- Halo Pelanggan -->
+    <div class="bg-white p-3 rounded-3 shadow-sm mb-3 border">
+        <h6 class="fw-bold m-0 text-dark">Selamat datang, <span class="text-primary"><%= customer ? customer.name : 'Pelanggan' %></span>! 👋</h6>
+        <small class="text-muted">Pilih menu favorit Anda dan langsung pesan dari meja.</small>
     </div>
 
-    <!-- Daftar Katalog Menu -->
-    <div class="row g-3" id="menu-container">
-        <% menus.forEach(menu => { %>
-            <div class="col-6 col-md-4 col-lg-3 menu-item-col" data-category="<%= menu.category_id %>">
-                <div class="card menu-card h-100">
-                    <img src="/uploads/<%= menu.image || 'default.png' %>" class="card-img-top menu-img" alt="<%= menu.name %>" onerror="this.src='https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=500'">
-                    <div class="card-body p-3 d-flex flex-column justify-content-between">
+    <!-- Filter Kategori Scrollable -->
+    <div class="category-scroll d-flex gap-2 mb-3 pb-1">
+        <button class="btn btn-dark btn-sm rounded-pill px-3 fw-bold filter-btn active" onclick="filterCategory('all', this)">
+            Semua
+        </button>
+        <% if (categories && categories.length > 0) { %>
+            <% categories.forEach(cat => { %>
+                <button class="btn btn-outline-secondary btn-sm rounded-pill px-3 fw-bold filter-btn" onclick="filterCategory('<%= cat.id %>', this)">
+                    <%= cat.name %>
+                </button>
+            <% }); %>
+        <% } %>
+    </div>
+
+    <!-- Daftar Katalog Menu dengan Foto -->
+<div class="row g-3" id="menu-container">
+    <% if (menus && menus.length > 0) { %>
+        <% menus.forEach(item => { %>
+            <div class="col-12 col-md-6 menu-item-card" data-category="<%= item.category_id %>">
+                <div class="card menu-card p-2 bg-white h-100 d-flex flex-row align-items-center justify-content-between gap-2">
+                    <div class="d-flex align-items-center gap-3">
+                        <!-- Thumbnail Foto Menu -->
+                        <img src="<%= item.image ? (item.image.startsWith('http') ? item.image : '/images/menus/' + item.image) : 'https://placehold.co/100x100/1e293b/ffffff?text=' + encodeURIComponent(item.name) %>" 
+                             alt="<%= item.name %>" 
+                             class="rounded-3 object-fit-cover shadow-sm" 
+                             style="width: 70px; height: 70px; min-width: 70px;"
+                             onerror="this.onerror=null; this.src='https://placehold.co/100x100/1e293b/ffffff?text=Sejiwa';">
+                        
                         <div>
-                            <h6 class="fw-bold mb-1 text-truncate"><%= menu.name %></h6>
-                            <p class="text-muted small mb-2 text-truncate-2"><%= menu.description || '-' %></p>
+                            <h6 class="fw-bold m-0 text-dark"><%= item.name %></h6>
+                            <p class="text-muted small m-0 mb-1"><%= item.description || 'Nikmat & khas Sejiwa' %></p>
+                            <span class="fw-bold text-success fs-6">Rp <%= Number(item.price).toLocaleString('id-ID') %></span>
                         </div>
-                        <div class="d-flex justify-content-between align-items-center mt-2">
-                            <span class="fw-bold text-success">Rp <%= Number(menu.price).toLocaleString('id-ID') %></span>
-                            <button class="btn btn-sm btn-primary rounded-circle" onclick="openDetailModal('<%= menu.id %>', '<%= menu.name %>', '<%= menu.price %>')">
-                                <i class="fa-solid fa-plus"></i>
-                            </button>
-                        </div>
+                    </div>
+                    <div class="pe-2">
+                        <button onclick="addToCart('<%= item.id %>', '<%= item.name %>', <%= item.price %>)" class="btn btn-warning text-dark fw-bold btn-sm rounded-pill px-3 shadow-sm">
+                            <i class="fa-solid fa-plus me-1"></i>Tambah
+                        </button>
                     </div>
                 </div>
             </div>
-        <% }) %>
+        <% }); %>
+    <% } else { %>
+        <div class="col-12">
+            <div class="alert alert-secondary text-center py-4 rounded-3">Belum ada menu yang tersedia saat ini.</div>
+        </div>
+    <% } %>
+</div>
+
+<!-- Bottom Floating Cart Bar -->
+<div class="cart-bar p-3 shadow-lg" id="cart-bar" style="display: none;">
+    <div class="container d-flex justify-content-between align-items-center">
+        <div>
+            <div class="small text-white-50"><span id="total-items">0</span> Item Dipilih</div>
+            <h5 class="fw-bold text-warning m-0" id="total-price-text">Rp 0</h5>
+        </div>
+        <button onclick="openCartModal()" class="btn btn-success fw-bold px-4 py-2 rounded-pill shadow-sm">
+            Lihat Pesanan <i class="fa-solid fa-arrow-right ms-1"></i>
+        </button>
     </div>
 </div>
 
-<!-- Modal Detail Menu -->
-<div class="modal fade" id="menuModal" tabindex="-1">
+<!-- Modal Rincian Keranjang -->
+<div class="modal fade" id="cartModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title fw-bold" id="modalMenuName">Detail Pesanan</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title fw-bold"><i class="fa-solid fa-basket-shopping text-warning me-2"></i>Keranjang Pesanan</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <input type="hidden" id="modalMenuId">
-                <input type="hidden" id="modalMenuPrice">
-                
-                <div class="mb-3">
-                    <label class="form-label fw-bold">Catatan Khusus (Opsional)</label>
-                    <input type="text" id="modalNotes" class="form-control" placeholder="Contoh: Less sugar, Less ice">
-                </div>
+                <div id="cart-items-list" class="mb-3"></div>
 
-                <div class="d-flex justify-content-between align-items-center">
-                    <span class="fw-bold">Jumlah:</span>
-                    <div class="input-group input-group-sm w-auto">
-                        <button class="btn btn-outline-secondary" onclick="updateModalQty(-1)">-</button>
-                        <input type="text" id="modalQty" class="form-control text-center" value="1" readonly style="width: 45px;">
-                        <button class="btn btn-outline-secondary" onclick="updateModalQty(1)">+</button>
+                <div class="border-top pt-2">
+                    <div class="d-flex justify-content-between text-muted small mb-1">
+                        <span>Subtotal</span>
+                        <span id="modal-subtotal">Rp 0</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center border-top pt-2 mt-2">
+                        <span class="fw-bold text-dark fs-6">Total Tagihan:</span>
+                        <h4 class="fw-bold text-success m-0" id="modal-total">Rp 0</h4>
                     </div>
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-primary w-100 fw-bold" onclick="addToCart()">
-                    Tambah ke Keranjang — <span id="modalTotalPrice">Rp 0</span>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                <button type="button" onclick="checkoutOrder()" id="btn-checkout" class="btn btn-success fw-bold px-4">
+                    Checkout Sekarang <i class="fa-solid fa-check-circle ms-1"></i>
                 </button>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Floating Bottom Cart Bar -->
-<div class="cart-bar p-3" id="cartBar" style="display: none;">
-    <div class="container d-flex justify-content-between align-items-center">
-        <div>
-            <small class="text-muted d-block"><span id="cartTotalItems">0</span> Item dipilih</small>
-            <h5 class="fw-bold m-0 text-primary" id="cartGrandTotal">Rp 0</h5>
-        </div>
-        <button class="btn btn-success fw-bold px-4" onclick="checkoutOrder()">
-            Checkout <i class="fa-solid fa-arrow-right ms-2"></i>
-        </button>
-    </div>
-</div>
-
-<!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
 <script>
     let cart = [];
-    let menuModalInstance = new bootstrap.Modal(document.getElementById('menuModal'));
+    let subtotal = 0;
+    let tax = 0;
+    let total = 0;
 
-    // Filter Kategori
+    const cartModal = new bootstrap.Modal(document.getElementById('cartModal'));
+
     function filterCategory(catId, btn) {
-        document.querySelectorAll('.category-btn').forEach(b => b.classList.replace('btn-dark', 'btn-outline-dark'));
-        btn.classList.replace('btn-outline-dark', 'btn-dark');
+        document.querySelectorAll('.filter-btn').forEach(b => {
+            b.classList.remove('btn-dark', 'active');
+            b.classList.add('btn-outline-secondary');
+        });
+        btn.classList.remove('btn-outline-secondary');
+        btn.classList.add('btn-dark', 'active');
 
-        document.querySelectorAll('.menu-item-col').forEach(col => {
-            if (catId === 'all' || col.getAttribute('data-category') === catId) {
-                col.style.display = 'block';
+        const items = document.querySelectorAll('.menu-item-card');
+        items.forEach(item => {
+            if (catId === 'all' || item.getAttribute('data-category') === catId) {
+                item.style.display = '';
             } else {
-                col.style.display = 'none';
+                item.style.display = 'none';
             }
         });
     }
 
-    // Modal Control
-    function openDetailModal(id, name, price) {
-        document.getElementById('modalMenuId').value = id;
-        document.getElementById('modalMenuName').innerText = name;
-        document.getElementById('modalMenuPrice').value = price;
-        document.getElementById('modalNotes').value = '';
-        document.getElementById('modalQty').value = 1;
-
-        updateModalTotalPrice();
-        menuModalInstance.show();
-    }
-
-    function updateModalQty(delta) {
-        let qtyEl = document.getElementById('modalQty');
-        let current = parseInt(qtyEl.value) + delta;
-        if (current >= 1) {
-            qtyEl.value = current;
-            updateModalTotalPrice();
-        }
-    }
-
-    function updateModalTotalPrice() {
-        let price = parseFloat(document.getElementById('modalMenuPrice').value);
-        let qty = parseInt(document.getElementById('modalQty').value);
-        document.getElementById('modalTotalPrice').innerText = 'Rp ' + (price * qty).toLocaleString('id-ID');
-    }
-
-    // Logic Keranjang
-    function addToCart() {
-        let id = document.getElementById('modalMenuId').value;
-        let name = document.getElementById('modalMenuName').innerText;
-        let price = parseFloat(document.getElementById('modalMenuPrice').value);
-        let qty = parseInt(document.getElementById('modalQty').value);
-        let notes = document.getElementById('modalNotes').value;
-
-        let existing = cart.find(item => item.menu_id === id && item.notes === notes);
+    function addToCart(menuId, name, price) {
+        const existing = cart.find(i => i.menu_id === menuId);
         if (existing) {
-            existing.qty += qty;
-            existing.subtotal = existing.qty * price;
+            existing.qty += 1;
+            existing.subtotal = existing.qty * existing.price;
         } else {
             cart.push({
-                menu_id: id,
+                menu_id: menuId,
                 name: name,
-                price: price,
-                qty: qty,
-                subtotal: price * qty,
-                notes: notes
+                price: Number(price),
+                qty: 1,
+                subtotal: Number(price),
+                notes: ''
             });
         }
-
-        menuModalInstance.hide();
-        renderCartBar();
+        updateCartUI();
     }
 
-    function renderCartBar() {
-        let cartBar = document.getElementById('cartBar');
-        if (cart.length === 0) {
+    function updateQty(menuId, delta) {
+        const item = cart.find(i => i.menu_id === menuId);
+        if (!item) return;
+
+        item.qty += delta;
+        if (item.qty <= 0) {
+            cart = cart.filter(i => i.menu_id !== menuId);
+        } else {
+            item.subtotal = item.qty * item.price;
+        }
+        updateCartUI();
+        renderCartModalList();
+    }
+
+    function updateNotes(menuId, value) {
+        const item = cart.find(i => i.menu_id === menuId);
+        if (item) {
+            item.notes = value;
+        }
+    }
+
+    function calculateTotals() {
+        subtotal = cart.reduce((acc, curr) => acc + curr.subtotal, 0);
+        tax = 0;
+        total = subtotal + tax;
+    }
+
+    function updateCartUI() {
+        calculateTotals();
+        const cartBar = document.getElementById('cart-bar');
+        const totalItems = cart.reduce((acc, curr) => acc + curr.qty, 0);
+
+        if (cart.length > 0) {
+            cartBar.style.display = 'block';
+            document.getElementById('total-items').innerText = totalItems;
+            document.getElementById('total-price-text').innerText = `Rp ${total.toLocaleString('id-ID')}`;
+        } else {
             cartBar.style.display = 'none';
+        }
+    }
+
+    function renderCartModalList() {
+        const container = document.getElementById('cart-items-list');
+        if (cart.length === 0) {
+            container.innerHTML = '<div class="alert alert-secondary text-center">Keranjang Anda kosong.</div>';
+            document.getElementById('btn-checkout').disabled = true;
             return;
         }
 
-        let totalQty = cart.reduce((sum, item) => sum + item.qty, 0);
-        let subtotal = cart.reduce((sum, item) => sum + item.subtotal, 0);
-        let tax = subtotal * 0.1; // Pajak 10%
-        let grandTotal = subtotal + tax;
+        document.getElementById('btn-checkout').disabled = false;
+        let html = '';
+        cart.forEach(item => {
+            html += `
+                <div class="border-bottom pb-2 mb-2">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <strong class="text-dark">${item.name}</strong>
+                        <span class="fw-bold text-success">Rp ${item.subtotal.toLocaleString('id-ID')}</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center gap-2">
+                        <input type="text" class="form-control form-control-sm" placeholder="Catatan (misal: Less sugar)" value="${item.notes || ''}" onchange="updateNotes('${item.menu_id}', this.value)">
+                        <div class="btn-group btn-group-sm">
+                            <button onclick="updateQty('${item.menu_id}', -1)" class="btn btn-outline-danger py-0 px-2 fw-bold">-</button>
+                            <span class="btn btn-light py-0 px-2 fw-bold disabled text-dark">${item.qty}</span>
+                            <button onclick="updateQty('${item.menu_id}', 1)" class="btn btn-outline-success py-0 px-2 fw-bold">+</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        container.innerHTML = html;
 
-        document.getElementById('cartTotalItems').innerText = totalQty;
-        document.getElementById('cartGrandTotal').innerText = 'Rp ' + grandTotal.toLocaleString('id-ID');
-        cartBar.style.display = 'block';
+        document.getElementById('modal-subtotal').innerText = `Rp ${subtotal.toLocaleString('id-ID')}`;
+        document.getElementById('modal-total').innerText = `Rp ${total.toLocaleString('id-ID')}`;
     }
 
-    // Checkout AJAX Engine
+    function openCartModal() {
+        renderCartModalList();
+        cartModal.show();
+    }
+
     async function checkoutOrder() {
-        if (cart.length === 0) return;
+    if (cart.length === 0) return alert('Keranjang masih kosong!');
 
-        let subtotal = cart.reduce((sum, item) => sum + item.subtotal, 0);
-        let tax = subtotal * 0.1;
-        let total = subtotal + tax;
+    const btnCheckout = document.getElementById('btn-checkout');
+    btnCheckout.disabled = true;
+    btnCheckout.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i> Memproses...';
 
+    try {
+        const response = await fetch('/customer/checkout', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                items: cart,
+                subtotal: subtotal,
+                tax: tax,
+                service_charge: 0,
+                total: total
+            })
+        });
+
+        const text = await response.text();
+        let result;
         try {
-            const response = await fetch('/customer/checkout', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    items: cart,
-                    subtotal: subtotal,
-                    tax: tax,
-                    service_charge: 0,
-                    total: total
-                })
-            });
-
-            const result = await response.json();
-            if (result.success) {
-                window.location.href = `/customer/payment/${result.orderNumber}`;
-            } else {
-                alert('Gagal checkout: ' + result.message);
-            }
-        } catch (error) {
-            alert('Terjadi kesalahan jaringan.');
+            result = JSON.parse(text);
+        } catch (e) {
+            console.error("Respon server bukan JSON:", text);
+            alert("Error Server: " + text.substring(0, 150));
+            btnCheckout.disabled = false;
+            btnCheckout.innerHTML = 'Checkout Sekarang <i class="fa-solid fa-check-circle ms-1"></i>';
+            return;
         }
+
+        if (result.success) {
+            window.location.href = `/customer/order/${result.orderNumber}/summary`;
+        } else {
+            alert('Gagal checkout: ' + (result.message || 'Terjadi kesalahan'));
+            btnCheckout.disabled = false;
+            btnCheckout.innerHTML = 'Checkout Sekarang <i class="fa-solid fa-check-circle ms-1"></i>';
+        }
+    } catch (error) {
+        console.error('Error checkout:', error);
+        alert('Terjadi kesalahan jaringan: ' + error.message);
+        btnCheckout.disabled = false;
+        btnCheckout.innerHTML = 'Checkout Sekarang <i class="fa-solid fa-check-circle ms-1"></i>';
     }
+}
 </script>
+
 </body>
 </html>
